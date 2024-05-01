@@ -1,3 +1,4 @@
+addi $sp, $0, 0x7FFFEFFC
 j main
 
 recursive:
@@ -35,31 +36,31 @@ addi $sp, $sp, 4
 ## sp = sp_0 - 4
 # chama rec n
 # load inicial de rec -> +4
-# n„o È zero, vai pra else
+# n√£o √© zero, vai pra else
 # store return e t0 -> -8
 ## sp = sp_0 - 8
 # chama rec n-1
 # load inicial de rec -> +4
-# n„o È zero, vai pra else
+# n√£o √© zero, vai pra else
 # store return e t0 -> -8
 ## sp = sp_0 - 12
 # chama rec n-2
 # load inicial de rec -> +4
-# n„o È zero, vai pra else
+# n√£o √© zero, vai pra else
 # store return e t0 -> -8
 ## sp = sp_0 - 16
 ## ...
 # chama rec n-k
 # load inicial de rec -> +4
-# n„o È zero, vai pra else
+# n√£o √© zero, vai pra else
 # store return e t0 -> -8
 ## sp = sp_0 - 8 - 4 * k
 ## ...
 ## sp = sp_0 - 8 - 4 * (n-1) = sp_0 - 4 - 4n
 # chama rec 0
-## no total, s„o feitas n + 1 chamadas
+## no total, s√£o feitas n + 1 chamadas
 # load inicial de rec -> +4
-# È zero, segue
+# √© zero, segue
 # store t0 -> -4
 ## sp = sp_0 - 4 - 4n
 # retorno de  0
@@ -85,14 +86,32 @@ addi $sp, $sp, 4
 ## sp = sp_0 - 4n + 4k
 ## ...
 ## para o programa seguir a partir
-## da primeira chamada de funÁ„o,
-## deve retornar todas, atÈ n
+## da primeira chamada de fun√ß√£o,
+## deve retornar todas, at√© n
 # retorno de n - 1
 # load return e t0 -> 8
 # store t0 -> -4
 ## sp = sp_0 - 4n + 4(n-1) = sp_0 - 4
 # retorno de n
-## apÛs retornar da chamada de rec(n),
-## j· est· na main
+## ap√≥s retornar da chamada de rec(n),
+## j√° est√° na main
 # load s1 -> 4
 ## sp = sp_0 - 4 + 4 = sp_0
+
+# chama rec n
+# n n√£o √© zero, else
+# chama rec n - 1
+# n n√£o √© zero, else
+# chama rec n - 2
+## ...
+# chama rec 0
+## no total, n + 1 chamadas
+# √© zero, segue
+# retorna 0
+# soma 1
+# retorna 1
+# soma 1
+# retorna 2
+## ...
+# soma 1
+# retorna n
