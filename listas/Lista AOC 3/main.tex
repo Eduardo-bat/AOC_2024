@@ -1,0 +1,186 @@
+\documentclass{article}
+\usepackage{xcolor}
+\usepackage[a4paper, total={7in, 10in}]{geometry}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage{textcomp}
+\usepackage{amsmath}
+\usepackage{mathtools}
+
+\title{\Huge Lista 3}
+\author{\Large Arquitetura e Organização de Computadores}
+\date{Junho de 2024}
+
+\begin{document}
+\large
+
+\maketitle
+
+\section*{Tema: memória cache}
+
+Para as questões 1-6, considere uma cache, até então sem dados validos, com 16 conjuntos, 2 vias por conjunto, 8 palavras por via, palavras e endereços de 16 bits, write-back como estratégia de escrita e \textit{Menos Recentemente Usada} como política de substituição.
+
+\begin{enumerate}
+
+\item O campo de índice tem quantos bits nesta cache?
+
+\item O campo de tag tem quantos bits nesta cache?
+
+\item Qual o tamanho, em bits, da cache?
+
+Para as questões 4 e 5, considere que o processador acessou, nesta ordem, os endereços \verb|0x00F0(L)|, \verb|0x00F1(L)|, \verb|0x0010(E)|, \verb|0x1018(L)|, \verb|0x2018(E)|, \verb|0x3018(E)|, \verb|0xFFF0(L)|, \verb|0xFF00(L)|. L \textrightarrow Leitura, E \textrightarrow Escrita.
+
+\item Quantas requisições foram feitas à memória principal?
+
+\item Quais endereços são escritos na memória principal?
+
+\item Qual o valor armazenado na tag do endereço \verb|0xBCDE|?
+
+\item Para uma cache de tamanho fixo, qual a consequência do aumento do tamanho de suas vias?
+
+\item Para uma cache de tamanho fixo, qual a consequência do aumento em sua quantidade de vias?
+
+\item Uma cache que sacrifique quantidade de vias por um maior tamanho de via beneficia qual tipo de localidade?
+
+\item Uma cache que sacrifique tamanho de via por uma maior quantidade de vias beneficia qual tipo de localidade?
+
+\item Como aumentar a localidade espacial do programa a seguir?
+
+\begin{center}
+    \begin{minipage}{0.575\textwidth}
+        \begin{lstlisting}[frame=single]
+int main() {
+    int i, j;
+    int m[8][8], a[8][8], b[8][8]; 
+    
+    for(j = 0; j < 8; j ++)
+        for(i = 0; i < 8; i ++)
+            m[i][j] = a[i][j] + b[i][j];
+    
+    return 0;
+}
+        \end{lstlisting}
+    \end{minipage}
+\end{center}
+
+\item Como aumentar a localidade temporal do programa a seguir?
+
+\begin{center}
+    \begin{minipage}{0.35\textwidth}
+        \begin{lstlisting}[frame=single]
+int main() {
+    int i = 0, j = 0;
+    int a = 0, b = 0;
+    
+    while(i < 10) {
+        j++;
+        a += i;
+        b = j + 2;
+        i++;
+        j = b % 2;
+    }
+}
+        \end{lstlisting}
+    \end{minipage}
+\end{center}
+
+\item Quanto à estratégia Write-Back:
+\begin{enumerate}
+    \item em que esta consiste?
+    \item qual parte do sistema faz seu controle?
+    \item como esta interfere na complexidade do hardware implementado?
+    \item como esta interfere na miss-penalty?
+    \item como esta interfere na velocidade das escritas feitas pelo processador?
+\end{enumerate}
+
+\item Quanto à estratégia Write-Through:
+\begin{enumerate}
+    \item em que esta consiste?
+    \item qual parte do sistema faz seu controle?
+    \item como esta interfere na complexidade do hardware implementado?
+    \item como esta interfere na miss-penalty?
+    \item como esta interfere na velocidade das escritas feitas pelo processador?
+\end{enumerate}
+
+\section*{Tema: memória virtual}
+
+Para as questões a seguir, considere um sistema com 4 GB de memória física, 64 GB de memória virtual e páginas de 8 kB.
+
+\item Quantos bits são destinados ao offset de página?
+
+\item Quantos bits são destinados ao número de página físico?
+
+\item Quantos bits são destinados ao número de página virtual?
+
+\item Quantas páginas tem a tabela de páginas?
+
+\item Em bits, qual o tamanho da tabela de páginas?
+
+\item Quais componentes do sistema gerenciam a memória virtual?
+
+\item Em um computador executando quatro processos, quantas tabelas de página estão instanciadas? Quantos registradores de tabela de página estão carregados?
+
+\item Quando o estado da memória é refletido na área de swap no disco?
+
+\item Descreva a sequência de acesso a um endereço registrado no TLB.
+
+\item Descreva a sequência de acesso a um endereço não registrado no TLB, mas mapeado na memória principal.
+
+\item Descreva a sequência de acesso a um endereço não registrado no TLB, nem mapeado na memória principal.
+
+\section*{Tema: entrada e saída endereçada por memória}
+
+\item Qual instrução envia dados a uma I/O mapeada em memória?
+
+\item Qual instrução lê dados de uma I/O mapeada em memória?
+
+\item Há alguma informação que indica ao processador com I/O mapeado em memória se este está acessando a memória ou um periférico? Se sim, qual?
+
+\item Como o processador pode acessar I/O por instruções destinadas a acesso à memória?
+
+\item Suponha um periférico com as seguintes características:
+\begin{itemize}
+    \item registradores:
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        nome    & endereço   & modo    & descrição                                                                                            \\ \hline
+        ctrl    & 0xFFFFF000 & escrita & \begin{tabular}[c]{@{}l@{}}0: reconhece status\\ 1: inicia leitura\end{tabular}                      \\ \hline
+        status  & 0xFFFFF004 & leitura & \begin{tabular}[c]{@{}l@{}}0: aguardando\\ 1: realizando leitura\\ 2: leitura concluída\end{tabular} \\ \hline
+        leitura & 0xFFFFF008 & leitura & contém o resultado da leitura                                                                        \\ \hline
+    \end{tabular}
+    \end{table}
+
+    \item sua leitura retorna valores que devem ser interpretados em ponto fixo;
+
+    \item é inicializado automaticamente, estando pronto para executar quando o programa começa;
+
+    \item ao ser inicializado, está no estado \texttt{aguardando} e o valor em \texttt{leitura} não é válido;
+
+    \item quando uma leitura é inicializada, o valor em \texttt{leitura} só é válido após sua conclusão;
+
+    \item quando uma leitura é concluída, a próxima só é iniciada após \texttt{ctrl} receber \texttt{0}, indicando que o usuário reconhece a sinalização de conclusão;
+\end{itemize}
+escreva um código MIPS que computa a média de cinco leituras deste periférico.
+
+\section*{Tema: barramentos}
+
+\item Compare um barramento multiplexado entre endereço e dado com um par de barramentos dedicados.
+
+\item É possível multiplexar, também, os sinais de controle? Por quê?
+
+\item Como é dada a organização temporal dos sinais em um barramento síncrono? Como os protocolos verificam a validade das transmissões neste tipo de barramento?
+
+\item Como é dada a organização temporal dos sinais em um barramento síncrono? Como os protocolos verificam a validade das transmissões neste tipo de barramento?
+
+\item Qual o papel do bus-master em um barramento compartilhado?
+
+\item Qual o papel do bus-arbiter em um barramento compartilhado?
+
+\item Em um barramento no qual um mestre deve ter a solicitação atendida imediatamente, qual deve ser a estratégia de alocação implementada?
+
+\end{enumerate}
+\end{document}

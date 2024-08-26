@@ -1,0 +1,269 @@
+\documentclass{article}
+\usepackage{xcolor}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage{url}
+
+\title{\Huge Lista 1 - Soluções}
+\author{\Large Arquitetura e Organização de Computadores}
+\date{Março 2024}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+
+\item \large Dentre as alternativas, qual programa em MIPS melhor traduz o código em C abaixo?
+
+\begin{center}
+    \begin{minipage}{0.5\textwidth}
+        \begin{lstlisting}[frame=single]
+    int abs(int num) {
+        if(num < 0)
+            return 0 - num;
+        else
+            return num;
+    }
+        \end{lstlisting}
+    \end{minipage}
+
+    \begin{minipage}{0.4\textwidth}
+        \begin{lstlisting}[frame=single]
+a)  abs:
+    bge $a0, $0, else
+    sub $v0, $0, $a0
+    j abs_exit
+    else:
+    add $v0, $0, $a0
+    abs_exit:
+    jr $ra
+        \end{lstlisting}%certo
+    \end{minipage}
+\end{center}
+
+\pagebreak
+\item \large Dentre as alternativas, quais programas em MIPS traduzem o código em C abaixo?
+
+\begin{center}
+    \begin{minipage}{0.5\textwidth}
+        \begin{lstlisting}[frame=single]
+    int min(int a, int b) {
+        if(a < b)
+            return a;
+        else
+            return b;
+    }
+        \end{lstlisting}
+    \end{minipage}
+\end{center}
+
+\begin{minipage}{0.4\textwidth}
+    \begin{lstlisting}[frame=single]
+b)  min:
+    add $v0, $0, $a0
+    blt $a0, $a1, min_xt
+    add $v0, $0, $a1
+    min_xt:
+    jr $ra
+    \end{lstlisting}%certo
+\end{minipage}
+\hspace{1cm}
+\begin{minipage}{0.4\textwidth}
+    \begin{lstlisting}[frame=single]
+c)  min:
+    blt $a0, $a1, then
+    add $v0, $0, $a1
+    j min_exit
+    then:
+    add $v0, $0, $a0
+    min_exit:
+    jr $ra
+    \end{lstlisting}%certo
+\end{minipage}
+
+\pagebreak
+
+\item \large Após a execução do programa abaixo, qual o estado do trecho de memória e dos registradores acessados?
+
+\begin{center}
+\begin{minipage}{0.4\textwidth}
+\begin{lstlisting}[frame=single]
+lui $t0, 0x1001
+addi $t0, $t0, 0x0008
+addi $t1, $0, 0x01
+sw $t1, 0($t0)
+addi $t1, $0, 0x02
+sw $t1, 4($t0)
+addi $t1, $0, 0x0E
+sw $t1, 8($t0)
+addi $t1, $0, 0x10
+sw $t1, 12($t0)
+addi $t0, $t0, 0x0C
+lw $t2, -4($t0)
+lw $t3, -8($t0)
+lw $t4, -12($t0)
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{0.55\textwidth}
+d)
+\begin{table}[H]
+    \begin{tabular}{|l|l|l|l|}
+    \hline
+    memória    & valor & registrador & valor      \\ \hline
+    0x10010000 & 0x00  & \$a2        & 0x00000000 \\ \hline
+    0x10010004 & 0x00  & \$a3        & 0x00000000 \\ \hline
+    0x10010008 & 0x01  & \$t0        & 0x10010014 \\ \hline
+    0x1001000C & 0x02  & \$t1        & 0x00000010 \\ \hline
+    0x10010010 & 0x0E  & \$t2        & 0x0000000E \\ \hline
+    0x10010014 & 0x10  & \$t3        & 0x00000002 \\ \hline
+    0x10010018 & 0x00  & \$t4        & 0x00000001 \\ \hline
+    0x1001001C & 0x00  & \$t5        & 0x00000000 \\ \hline
+    \end{tabular}%certo
+\end{table}
+\end{minipage}
+\end{center}
+
+\item \large Considere que \verb|0xABCD|, \verb|0b1011_1010_1100_0001| e \verb|0b0100010100111110|  estão armazenados em big-endian. Como é sua representação em little-endian?
+
+\begin{spacing}{1.5}
+\begin{enumerate}
+\item \verb|0xCDAB|, \verb|0b1100_0001_1011_1010| e \verb|0b0011111001000101|%certo
+\end{enumerate}
+\end{spacing}
+\bigskip
+
+\item \large Para cada instrução a seguir, indique sua representação em código de máquina MIPS:
+
+\begin{spacing}{1.5}
+\begin{enumerate}
+\item \verb|ADD $s0, $s1, $s2|
+
+\begin{enumerate}
+\item \verb|0x02328020|%certo
+\end{enumerate}
+
+\item \verb|J ident| (considere que \verb|ident| está no endereço 0x00400004)
+
+\begin{enumerate}
+\item \verb|0x08100001|%certo
+\end{enumerate}
+
+\item \verb|ADDI $t0, $t1, 1|
+
+\begin{enumerate}
+\item \verb|0x21280001|%certo
+\end{enumerate}
+
+\end{enumerate}
+\end{spacing}
+\bigskip
+
+\item \large Para cada código de máquina a seguir, indique a correspondente instrução em MIPS:
+
+\begin{spacing}{1.5}
+\begin{enumerate}
+\item \verb|0x02328022|
+
+\begin{enumerate}
+\item \verb|sub $s0, $s1, $s2|%certo
+\end{enumerate}
+
+\item \verb|0x02000008|
+
+\begin{enumerate}
+\item \verb|jr $s0|%certo
+\end{enumerate}
+
+\item \verb|0x25280001|
+
+\begin{enumerate}
+\item \verb|addiu $t0, $t1, 1|%certo
+\end{enumerate}
+
+\end{enumerate}
+\end{spacing}
+\bigskip
+
+\item \large Qual número é armazenado como \verb|0xA3| em \verb|fixo(8, 3)|?
+
+\smallskip
+
+\iffalse
+10100011 = -93
+-93/16=-5.8125
+\fi
+
+\begin{enumerate}
+\item \verb|-5.8125|%certo
+\end{enumerate}
+
+\bigskip
+
+\item \large Qual valor hexadecimal representa o número \verb|-2.5| em \verb|fixo(8, 3)|?
+
+\smallskip
+
+\iffalse
+2.5 = 0010.1000
+      1101.0111
+-2.5= 1101.1000
+\fi
+
+\begin{enumerate}
+\item \verb|0xD8|%certo
+\end{enumerate}
+
+\item \large Qual valor hexadecimal representa o número \verb|-2.5| em \verb|fixo(8, 0)|?
+
+\smallskip
+
+\begin{enumerate}
+\item \verb|0xFB|%certo
+\end{enumerate}
+
+\pagebreak
+
+\item \large Compile o código abaixo para MIPS. Indique os endereços e registradores correspondentes a cada variável.
+
+\begin{lstlisting}[frame=single]
+void swap(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+int bubbleSort(int array[], int size) {
+
+    int swaps = 0;
+
+    for (int step = 0; step < size - 1; ++step) {
+        for (int i = 0; i < size - step - 1; ++i) {
+            if (array[i] > array[i + 1]) {
+                swap(array + i, array + i + 1);
+                swaps ++;
+            }
+        }
+    }
+
+    return swaps;
+}
+
+int main() {
+    int a[] = {2, 1, 7, 4, 3, 9, 8, 6};
+    int tam = sizeof(a)/sizeof(*a);
+    int s = bubbleSort(a, tam);
+    return 0;
+}
+
+\end{lstlisting}
+
+\url{https://github.com/Eduardo-bat/AOC_12024/blob/main/bubblesort.asm}
+
+\end{enumerate}
+
+\end{document}

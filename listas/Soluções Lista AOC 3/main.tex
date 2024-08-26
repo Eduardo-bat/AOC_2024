@@ -1,0 +1,262 @@
+\documentclass{article}
+\usepackage{xcolor}
+\usepackage[a4paper, total={7in, 10in}]{geometry}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage{textcomp}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{url}
+
+\title{\Huge Soluções da Lista 3}
+\author{\Large Arquitetura e Organização de Computadores}
+\date{Junho de 2024}
+
+\begin{document}
+\large
+
+\maketitle
+
+\section*{Tema: memória cache}
+
+Para as questões 1-6, considere uma cache, até então sem dados validos, com 16 conjuntos, 2 vias por conjunto, 8 palavras por via, palavras e endereços de 16 bits, write-back como estratégia de escrita e \textit{Menos Recentemente Usada} como política de substituição.
+
+\begin{enumerate}
+
+\item O campo de índice tem quantos bits nesta cache?
+$\log_2{16} = 4$
+
+\item O campo de tag tem quantos bits nesta cache?
+$16 - 4 - 3 - 1 = 8$
+
+\item Qual o tamanho, em bits, da cache?
+$16\ \text{bit/palavra}\ *\ 8\ \text{palavra/via}\ *\ 2\ \text{via/conjunto}\ *\ 16\ \text{conjunto}\ +\ 8\ \text{bit/tag}\ *\ 1\ \text{tag/via}\ *\ 2\ \text{via/conjunto}\ *\ 16\ \text{conjunto}\ +\ 1\ \text{bit\_validade/via}\ *\ 2\ \text{via/conjunto}\ *\ 16\ \text{conjunto}\ +\ 1\ \text{bit\_escrita/via}\ *\ 2\ \text{via/conjunto}\ *\ 16\ \text{conjunto}\ +\ 1\ \text{bit\_uso/conjunto}\ *\ 16\ \text{conjunto}\ =\ 4432\ \text{bits}$
+
+Para as questões 4 a 6, considere que o processador acessou, nesta ordem, os endereços \verb|0x00F0(L)|, \verb|0x00F1(L)|, \verb|0x0010(E)|, \verb|0x1018(L)|, \verb|0x2018(E)|, \verb|0x3018(E)|, \verb|0xFFF0(L)|, \verb|0xFF00(L)|. L \textrightarrow Leitura, E \textrightarrow Escrita.
+
+\item Quantas requisições foram feitas à memória principal? \verb|0x00F0(L)|, \verb|0x0010(L)|, \verb|0x1018(L)|, \verb|0x0010(E)|, \verb|0x2018(L)|, \verb|0x3018(L)|, \verb|0xFFF0(L)| e \verb|0xFF00(L)|: 8 requisições.
+
+\item Quais endereços são escritos na memória principal? \verb|0x0010|, porque, após sua requisição, são acessados mais blocos com o mesmo índice, \verb|0001|, do que o conjunto suporta armazenar. \verb|0x1010| não é escrito na memória principal porque seu conteúdo não foi alterado na cache.
+
+\item Qual o valor armazenado na tag do endereço \verb|0xBCDE|? \verb|10111100|
+
+\item Para uma cache de tamanho fixo, qual a consequência do aumento do tamanho de suas vias? Mais palavras são armazenadas na cache a cada requisição à memória principal, o que beneficia a localidade espacial dos programas. Em contrapartida, ou a quantidade de conjuntos, ou a quantidade de vias será reduzida, o que prejudica programas com maior localidade temporal, já que há maior possibilidade de um endereço recentemente acessado ser substituído.
+
+\item Para uma cache de tamanho fixo, qual a consequência do aumento em sua quantidade de vias? Mais endereços com um mesmo índice poderão ser mantidos na cache concomitantemente. Isto beneficia a localidade temporal, já que a probabilidade de um endereço recentemente acessado ser substituído na cache é reduzida. Por outro lado, se este aumento sacrificar o tamanho das vias, a localidade espacial é prejudicada, já que menos palavras adjacentes são transferidas em cada acesso à memória principal.
+
+\item Uma cache que sacrifique quantidade de vias por um maior tamanho de via beneficia qual tipo de localidade? Espacial.
+
+\item Uma cache que sacrifique tamanho de via por uma maior quantidade de vias beneficia qual tipo de localidade? Temporal.
+
+\item Como aumentar a localidade espacial do programa a seguir?
+
+\begin{center}
+    \begin{minipage}{0.575\textwidth}
+        \begin{lstlisting}[frame=single]
+int main() {
+    int i, j;
+    int m[8][8], a[8][8], b[8][8]; 
+    
+    for(j = 0; j < 8; j ++)
+        for(i = 0; i < 8; i ++)
+            m[i][j] = a[i][j] + b[i][j];
+    
+    return 0;
+}
+        \end{lstlisting}
+    \end{minipage}
+\end{center}
+
+\begin{center}
+    \begin{minipage}{0.575\textwidth}
+        \begin{lstlisting}[frame=single]
+int main() {
+    int i, j;
+    int m[8][8], a[8][8], b[8][8]; 
+    
+    for(i = 0; i < 8; i ++)
+        for(j = 0; j < 8; j ++)
+            m[i][j] = a[i][j] + b[i][j];
+    
+    return 0;
+}
+        \end{lstlisting}
+    \end{minipage}
+\end{center}
+
+\item Como aumentar a localidade temporal do programa a seguir?
+
+\begin{center}
+    \begin{minipage}{0.35\textwidth}
+        \begin{lstlisting}[frame=single]
+int main() {
+    int i = 0, j = 0;
+    int a = 0, b = 0;
+    
+    while(i < 10) {
+        j++;
+        a += i;
+        b = j + 2;
+        i++;
+        j = b % 2;
+    }
+}
+        \end{lstlisting}
+    \end{minipage}
+\end{center}
+
+\begin{center}
+    \begin{minipage}{0.35\textwidth}
+        \begin{lstlisting}[frame=single]
+int main() {
+    int i = 0, j = 0;
+    int a = 0, b = 0;
+    
+    while(i < 10) {
+        a += i;
+        i++;
+        
+        j++;
+        b = j + 2;
+        j = b % 2;
+    }
+}
+        \end{lstlisting}
+    \end{minipage}
+\end{center}
+
+\item Quanto à estratégia Write-Back:
+\begin{enumerate}
+    \item em que esta consiste? somente transmitir uma via da cache à memória principal quando o bloco desta via precisar ser substituído na cache.
+    \item qual parte do sistema faz seu controle? a própria cache, em hardware.
+    \item como esta interfere na complexidade do hardware implementado? a aumenta consideravelmente
+    \item como esta interfere na miss-penalty? a miss-penalty é aumentada porque, quando um endereço será substituído na cache, seu conteúdo precisa ser escrito na memória principal
+    \item como esta interfere na velocidade das escritas feitas pelo processador? aumenta consideravelmente, já que as escritas são feitas somente na cache
+\end{enumerate}
+
+\item Quanto à estratégia Write-Through:
+\begin{enumerate}
+    \item em que esta consiste? em escrever na cache e na memória principal a cada escrita
+    \item qual parte do sistema faz seu controle? o processador
+    \item como esta interfere na complexidade do hardware implementado? a mantém inferior à da write-back
+    \item como esta interfere na miss-penalty? não a altera
+    \item como esta interfere na velocidade das escritas feitas pelo processador? as mantém lentas, já que toda escrita acessa a memória principal
+\end{enumerate}
+
+\section*{Tema: memória virtual}
+
+Para as questões a seguir, considere um sistema com 4 GB de memória física, 64 GB de memória virtual e páginas de 8 kB.
+
+\item Quantos bits são destinados ao offset de página? $\log_2{8*1024} = 13\ \text{bits}$
+
+\item Quantos bits são destinados ao número de página físico? $32 - 13 = 19\ \text{bits}$
+
+\item Quantos bits são destinados ao número de página virtual? $36 - 13 = 23\ \text{bits}$
+
+\item Quantas páginas tem a tabela de páginas? $2^{23} = 8388608\ \text{páginas}$
+
+\item Em bits, qual o tamanho da tabela de páginas? $8388608 * (19 + 1\ \text{bit\_de\_validade} + 1\ \text{bit\_de\_escrita} + 1\ \text{bit\_de\_uso}) = 184549376\ \text{bits}$
+
+\item Quais componentes do sistema gerenciam a memória virtual? Toda a operação da memória virtual é gerenciada pelo sistema operacional.
+
+\item Em um computador executando quatro processos, quantas tabelas de página estão instanciadas? Quantos registradores de tabela de página estão carregados? São instanciadas quatro tabelas de página. Entretanto, há somente um registrador para armazenar o endereço da página. O conteúdo deste é alterado conforme o processo ativo.
+
+\item Quando o estado da memória é refletido na área de swap no disco? Quando seu conteúdo precisa ser substituído e houve uma escrita no endereço correspondente da memória física.
+
+\item Descreva a sequência de acesso a um endereço registrado no TLB.
+
+\begin{enumerate}
+    \item o processador soma o número de página virtual ao valor contido no registrador de tabela de página;
+    \item o processador transmite o resultado ao TLB;
+    \item o TLB compara este número com a tag de cada uma de suas entradas;
+    \item o TLB indica ao processador que encontrou correspondência e retorna o número de página física;
+    \item o processador concatena este número ao offset do endereço e o acessa na memória principal;
+\end{enumerate}
+
+\item Descreva a sequência de acesso a um endereço não registrado no TLB, mas mapeado na memória principal.
+
+\begin{enumerate}
+    \item o processador soma o número de página virtual ao valor contido no registrador de tabela de página;
+    \item o processador transmite o resultado ao TLB;
+    \item o TLB compara este número com cada uma de suas entradas;
+    \item o TLB indica ao processador que o endereço não está registrado nele;
+    \item o processador acessa a memória no endereço resultante, referente à respectiva entrada na tabela de páginas do processo;
+    \item nesta entrada, lê que o endereço está na memória principal e extrai o respectivo número de página física;
+    \item o processador concatena este número ao offset do endereço e acessa a memória principal no endereço resultante;
+\end{enumerate}
+
+\item Descreva a sequência de acesso a um endereço não registrado no TLB, nem mapeado na memória principal.
+
+\begin{enumerate}
+    \item o processador soma o número de página virtual ao valor contido no registrador de tabela de página;
+    \item o processador transmite o resultado ao TLB;
+    \item o TLB compara este número com cada uma de suas entradas;
+    \item o TLB indica ao processador que o endereço não está registrado nele;
+    \item o processador acessa a memória no endereço resultante, referente à respectiva entrada na tabela de páginas do processo;
+    \item nesta entrada, lê que o endereço não está na memória principal;
+    \item ocorrendo um \textit{page fault}, o sistema operacional interrompe o processo;
+    \item o SO, então, busca uma página cujo bit de uso seja 0;
+    \item caso o bit de escrita desta seja 1, o SO transfere seu conteúdo para o disco;
+    \item o SO transfere o conteúdo da página no disco para a página recém-liberada na memória;
+    \item o processo é retomado, busca, novamente, o dado e o acessa na memória principal;
+\end{enumerate}
+
+\section*{Tema: entrada e saída endereçada por memória}
+
+\item Qual instrução envia dados a uma I/O mapeada em memória? s(w, h ou b)
+
+\item Qual instrução lê dados de uma I/O mapeada em memória? l(w, h ou b)
+
+\item Há alguma informação que indica ao processador com I/O mapeado em memória se este está acessando a memória ou um periférico? Se sim, qual? Não há.
+
+\item Como o processador pode acessar I/O por instruções destinadas a acesso à memória? Há suporte em hardware para tal: o decodificador de endereços recebe o mesmo endereço que a memória e os sinais de controle necessários para identificar a instrução executada. Com base nestes e caso se aplique, seleciona o periférico que deve receber o dado ou de qual periférico a saída deve ser transmitida ao processador.
+
+\item Suponha um periférico com as seguintes características:
+\begin{itemize}
+    \item registradores:
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        nome    & endereço   & modo    & descrição                                                                                            \\ \hline
+        ctrl    & 0xFFFFF000 & escrita & \begin{tabular}[c]{@{}l@{}}0: reconhece status\\ 1: inicia leitura\end{tabular}                      \\ \hline
+        status  & 0xFFFFF004 & leitura & \begin{tabular}[c]{@{}l@{}}0: aguardando\\ 1: realizando leitura\\ 2: leitura concluída\end{tabular} \\ \hline
+        leitura & 0xFFFFF008 & leitura & contém o resultado da leitura                                                                        \\ \hline
+    \end{tabular}
+    \end{table}
+
+    \item sua leitura retorna valores que devem ser interpretados em ponto fixo;
+
+    \item é inicializado automaticamente, estando pronto para executar quando o programa começa;
+
+    \item ao ser inicializado, está no estado \texttt{aguardando} e o valor em \texttt{leitura} não é válido;
+
+    \item quando uma leitura é inicializada, o valor em \texttt{leitura} só é válido após sua conclusão;
+
+    \item quando uma leitura é concluída, a próxima só pode ser iniciada após \texttt{ctrl} receber \texttt{0}, indicando que o usuário reconhece a sinalização de conclusão;
+\end{itemize}
+escreva um código MIPS que computa a média de cinco leituras deste periférico.
+
+\url{https://github.com/Eduardo-bat/AOC_2024/blob/main/mmio.asm}
+
+\section*{Tema: barramentos}
+
+\item Compare um barramento multiplexado entre endereço e dado com um par de barramentos dedicados. Barramentos multiplexados consomem menos material e área, a custo de redução na velocidade de transmissão. Barramentos dedicados são mais rápidos, mas, também, mais custosos.
+
+\item É possível multiplexar, também, os sinais de controle? Por quê? É possível, sim. Sequências específicas podem ser adotadas como controle, reduzindo linhas, mas aumentando a latência das transações. O protocolo I\textsubscript{2}C, por exemplo, usa esta estratégia. Entretanto, outras especificações, como a da linha 808x da Intel, optam por manter as linhas de controle separadas, em prol de reduzir a latência de cada transmissão.
+
+\item Como é dada a organização temporal dos sinais em um barramento síncrono? Como os protocolos verificam a validade das transmissões neste tipo de barramento? Em um barramento síncrono, a temporização dos sinais é feita em relação aos ciclos de clock. Durante uma transmissão, o significado do valor em cada linha é determinado pelo ciclo de clock no qual a transmissão está. Os protocolos definidos sobre este tipo de barramento podem distinguir a validade das transmissões por meio dos valores capturados em certas linhas em determinados ciclos de clock. Por exemplo, um transmissor pode verificar se a linha \texttt{status} tem valor \texttt{0x00} no último ciclo de uma transmissão para determinar se esta foi bem-sucedida.
+
+\item Como é dada a organização temporal dos sinais em um barramento síncrono? Como os protocolos verificam a validade das transmissões neste tipo de barramento? Em um barramento assíncrono, a temporização dos sinais é feita em relação aos próprios sinais. Durante a transmissão, o significado do valor em cada linha é determinado por qual foi o último sinal transmitido. Os protocolos definidos sobre este tipo de barramento podem distinguir a validade das transmissões por meio do intervalo entre os sinais ou pelo valor dos sinais. Por exemplo, um transmissor pode aguardar até \texttt{1 s} pelo sinal de \texttt{acknowledge} e verificar se este contém o valor \texttt{0xAA}.
+
+\item Qual o papel do bus-master em um barramento compartilhado? É o bus-master quem inicia transações.
+
+\item Qual o papel do bus-arbiter em um barramento compartilhado? É o bus-arbiter quem determina qual bus-master pode iniciar uma transação.
+
+\item Em um barramento no qual um mestre deve ter a solicitação atendida imediatamente, qual deve ser a estratégia de alocação implementada? Preemptiva com prioridade.
+
+\end{enumerate}
+\end{document}
+
