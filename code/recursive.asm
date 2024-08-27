@@ -1,36 +1,84 @@
+# inicializa o ponteiro
+# da stack para um endereço
+# conhecido
 addi $sp, $0, 0x7FFFEFFC
+
 j main
 
 recursive:
-lw $t0, 0($sp)
-addi $sp, $sp, 4
+	# carrega o argumento
+	# da stack
+	lw $t0, 0($sp)
+	addi $sp, $sp, 4
 
-bne $t0, $0, else
-addi $sp, $sp, -4
-sw $t0, 0($sp)
-jr $ra
+	# se o argumento não for zero
+	# não retorna, ainda
+	bne $t0, $0, else
 
-else:
-addi $t0, $t0, -1
-addi $sp, $sp, -8
-sw $t0, 0($sp)
-sw $ra, 4($sp)
-jal recursive
-lw $t0, 0($sp)
-lw $ra, 4($sp)
-addi $sp, $sp, 8
-addi $t0, $t0, 1
-addi $sp, $sp, -4
-sw $t0, 0($sp)
+	# armazena 0 na stack
+	addi $sp, $sp, -4
+	sw $t0, 0($sp)
+
+	# retorna 0 para o chamador
+	jr $ra
+
+	else:
+	# decrementa o argumento
+	addi $t0, $t0, -1
+
+	# armazena o argumento
+	# e o endereço de retorno
+	# na stack
+	addi $sp, $sp, -8
+	sw $t0, 0($sp)
+	sw $ra, 4($sp)
+
+	# chama a função recursiva
+	jal recursive
+
+	# carrega o argumento
+	# e o endereço de retorno
+	# da stack
+	lw $t0, 0($sp)
+	lw $ra, 4($sp)
+	addi $sp, $sp, 8
+
+	# incrementa o argumento
+	addi $t0, $t0, 1
+
+	# armazena o argumento
+	# incrementado na stack
+	addi $sp, $sp, -4
+	sw $t0, 0($sp)
+
 jr $ra
 
 main:
-addi $s0, $0, 0xABCD
-addi $sp, $sp, -4
-sw $s0, 0($sp)
-jal recursive
-lw $s1, 0($sp)
-addi $sp, $sp, 4
+	# carrega o argumento
+	addi $s0, $0, 0xABCD
+
+	# armazena o argumento
+	# na stack
+	addi $sp, $sp, -4
+	sw $s0, 0($sp)
+
+	# chama a função
+	jal recursive
+
+	# carrega o resultado
+	# da stack
+	lw $s1, 0($sp)
+	addi $sp, $sp, 4
+
+j exit
+
+exit:
+	addi $v0, $0, 10
+	syscall
+# exit
+
+# analises solicitadas
+# nas questões:
 
 # store s0 -> -4
 ## sp = sp_0 - 4
